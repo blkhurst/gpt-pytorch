@@ -3,6 +3,17 @@
 import torch
 from torch import nn
 import torch.nn.functional as F
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class ModelConfig:
+    vocab_size: int = 50_000
+    embedding_dim: int = 768
+    context_length: int = 1024
+    n_heads: int = 6
+    n_layers: int = 6
+
 
 # class SelfAttention(nn.Module):
 #     def __init__(self, embedding_dim: int):
@@ -108,11 +119,11 @@ class TransformerBlock(nn.Module):
 class GPT(nn.Module):
     def __init__(
         self,
-        vocab_size=50_000,
-        embedding_dim=768,
-        context_length=1024,
-        n_heads=6,
-        n_layers=6,
+        vocab_size: int,
+        embedding_dim: int,
+        context_length: int,
+        n_heads: int,
+        n_layers: int,
     ):
         super().__init__()
         self.context_length = context_length
