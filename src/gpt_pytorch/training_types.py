@@ -17,6 +17,7 @@ class TrainingConfig:
     evaluate_max_batches: int | None = 100
     checkpoint_dir: str = "checkpoints"
     checkpoint_every: int = 5000
+    latest_every: int = 100
 
     def __post_init__(self):
         for value in (
@@ -24,6 +25,7 @@ class TrainingConfig:
             self.batch_size,
             self.evaluate_every,
             self.checkpoint_every,
+            self.latest_every,
         ):
             if type(value) is not int or value <= 0:
                 raise ValueError(

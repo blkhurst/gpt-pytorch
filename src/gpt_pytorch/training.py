@@ -118,7 +118,12 @@ def train(
             state.total_loss = 0.0
             state.total_tokens = 0
 
-        # Save a checkpoint, including the final step
+        # Replace The Rolling Checkpoint
+        if state.completed_steps % config.latest_every == 0 or finished:
+            path = Path(config.checkpoint_dir) / "latest.pt"
+            save_checkpoint(model, optimizer, metadata, path)
+
+        # Save Numbered Checkpoints
         if state.completed_steps % config.checkpoint_every == 0 or finished:
             path = Path(config.checkpoint_dir) / f"step-{state.completed_steps:06d}.pt"
             save_checkpoint(model, optimizer, metadata, path)

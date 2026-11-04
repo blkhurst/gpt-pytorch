@@ -116,6 +116,7 @@ def check_resume(config: TrainingConfig, previous: TrainingConfig):
         "evaluate_max_batches",
         "checkpoint_dir",
         "checkpoint_every",
+        "latest_every",
     ):
         current.pop(name)
         saved.pop(name)
