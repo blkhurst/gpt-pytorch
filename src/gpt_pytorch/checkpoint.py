@@ -124,3 +124,24 @@ def check_resume(config: TrainingConfig, previous: TrainingConfig):
         raise ValueError(
             "Resume settings must match; only more steps and evaluation/save settings may change."
         )
+
+
+def is_checkpoint_directory_safe(
+    directory: str | Path,
+    resume: str | Path | None = None,
+) -> bool:
+    """Ensure target directory is empty unless resuming an existing checkpoint"""
+    directory = Path(directory).expanduser().resolve()
+
+    # Allow A New Or Empty Directory
+    if not directory.exists():
+        return True
+    if not directory.is_dir():
+        return False
+    if not any(directory.iterdir()):
+        return True
+
+    # Otherwise, Require A Checkpoint From This Directory
+    if resume is None:
+        return False
+    return Path(resume).expanduser().resolve().parent == directory
