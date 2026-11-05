@@ -102,21 +102,21 @@ def train(
         # Train one step & accumulate loss
         loss, token_count = train_step(model, inputs, targets, optimizer)
         state.completed_steps += 1
-        state.total_loss += loss * token_count
-        state.total_tokens += token_count
+        state.loss_sum_since_eval += loss * token_count
+        state.tokens_since_eval += token_count
         finished = state.completed_steps == config.steps
 
         # Calculate average training loss & evaluate validation data
         if state.completed_steps % config.evaluate_every == 0 or finished:
-            training_loss = state.total_loss / state.total_tokens
+            training_loss = state.loss_sum_since_eval / state.tokens_since_eval
             metrics = TrainingInfo(state.completed_steps, training_loss)
             if validation_loader is not None:
                 metrics.validation_loss, metrics.validation_accuracy = evaluate(
                     model, validation_loader, config.evaluate_max_batches
                 )
             state.history.append(metrics)
-            state.total_loss = 0.0
-            state.total_tokens = 0
+            state.loss_sum_since_eval = 0.0
+            state.tokens_since_eval = 0
 
         # Replace The Rolling Checkpoint
         if state.completed_steps % config.latest_every == 0 or finished:

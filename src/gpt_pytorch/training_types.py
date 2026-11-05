@@ -61,5 +61,5 @@ class TrainingInfo:
 class TrainingState:
     completed_steps: int = 0
     history: list[TrainingInfo] = field(default_factory=list)
-    total_loss: float = 0.0  # Token-weighted loss since the last history entry
-    total_tokens: int = 0
+    loss_sum_since_eval: float = 0.0  # Token-weighted loss since the last history entry
+    tokens_since_eval: int = 0

@@ -47,3 +47,7 @@ def load_config(path: str | Path) -> CheckpointMetadata:
         model=model,
         training=training,
     )
+
+
+def configs_match(current: CheckpointMetadata, saved: CheckpointMetadata) -> bool:
+    return current.model_type == saved.model_type and current.model == saved.model
