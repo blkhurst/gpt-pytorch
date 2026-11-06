@@ -99,7 +99,7 @@ def train_model(args: argparse.Namespace) -> None:
     )
 
     print(
-        f"Checkpoints: latest.pt every {training_config.latest_every:,} steps | "
+        f"Checkpoints: latest_with_optimizer.pt every {training_config.latest_every:,} steps | "
         f"Numbered: every {training_config.checkpoint_every:,} steps"
     )
 
@@ -136,7 +136,7 @@ def train_model(args: argparse.Namespace) -> None:
             on_step=report_step,
         )
 
-    path = Path(training_config.checkpoint_dir) / "latest.pt"
+    path = Path(training_config.checkpoint_dir) / "latest_with_optimizer.pt"
     print(f"Saved: {path}")
 
 

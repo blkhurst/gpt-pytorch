@@ -120,13 +120,14 @@ def train(
 
         # Replace The Rolling Checkpoint
         if state.completed_steps % config.latest_every == 0 or finished:
-            path = Path(config.checkpoint_dir) / "latest.pt"
+            path = Path(config.checkpoint_dir) / "latest_with_optimizer.pt"
             save_checkpoint(model, optimizer, metadata, path)
 
         # Save Numbered Checkpoints
         if state.completed_steps % config.checkpoint_every == 0 or finished:
-            path = Path(config.checkpoint_dir) / f"step-{state.completed_steps:06d}.pt"
-            save_checkpoint(model, optimizer, metadata, path)
+            filename = f"{metadata.name}-{state.completed_steps:06d}.pt"
+            path = Path(config.checkpoint_dir) / filename
+            save_checkpoint(model, optimizer, metadata, path, save_optimizer=False)
 
         # Callback
         if on_step is not None:

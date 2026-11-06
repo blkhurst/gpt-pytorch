@@ -25,24 +25,31 @@ class CheckpointMetadata:
 class Checkpoint:
     model: GPT
     metadata: CheckpointMetadata
-    optimizer_state: dict
-    rng_state: torch.Tensor
+    optimizer_state: dict | None
+    rng_state: torch.Tensor | None
     cuda_rng_state: list[torch.Tensor]
 
 
 def save_checkpoint(
-    model: GPT, optimizer: Optimizer, metadata: CheckpointMetadata, path: str | Path
+    model: GPT,
+    optimizer: Optimizer,
+    metadata: CheckpointMetadata,
+    path: str | Path,
+    *,
+    save_optimizer: bool = True,
 ):
-    # Collect Weights, Current Run, Optimizer & Random State
+    # Collect Weights & Current Run
     checkpoint = {
         "metadata": asdict(metadata),
         "model": model.state_dict(),
-        "optimizer": optimizer.state_dict(),
-        "rng_state": torch.get_rng_state(),
-        "cuda_rng_state": (
-            torch.cuda.get_rng_state_all() if torch.cuda.is_available() else []
-        ),
     }
+
+    # Include Training State If Saving Optimizer
+    if save_optimizer:
+        checkpoint["optimizer"] = optimizer.state_dict()
+        checkpoint["rng_state"] = torch.get_rng_state()
+        if torch.cuda.is_available():
+            checkpoint["cuda_rng_state"] = torch.cuda.get_rng_state_all()
 
     # Write Completely Before Replacing The Previous Checkpoint
     path = Path(path).expanduser()
@@ -88,15 +95,19 @@ def load_checkpoint(path: str | Path, device="cpu") -> Checkpoint:
     return Checkpoint(
         model,
         metadata,
-        values["optimizer"],
-        values["rng_state"],
-        values["cuda_rng_state"],
+        values.get("optimizer"),
+        values.get("rng_state"),
+        values.get("cuda_rng_state", []),
     )
 
 
 def restore_training_state(
     checkpoint: Checkpoint, optimizer: Optimizer, config: TrainingConfig
 ):
+    # Require A Checkpoint With Optimizer & Random State
+    if checkpoint.optimizer_state is None or checkpoint.rng_state is None:
+        raise ValueError("Resume requires latest_with_optimizer.pt.")
+
     check_resume(config, checkpoint.metadata.training)
 
     # Restore Optimizer & Random State; Record The Updated Run Settings
